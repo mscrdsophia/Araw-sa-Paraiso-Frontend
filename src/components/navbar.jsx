@@ -22,7 +22,10 @@ const Navbar = () => {
         </div>
 
         {/* Logo */}
-        <img src={Logo} alt="Hotel Logo" className="h-14" />
+        <a href="/">
+          <img  src={Logo} alt="Hotel Logo" className="h-14" />
+        </a>
+        
 
         <div className="flex items-center space-x-4">
           <a href="/reserve" className="bg-black text-white px-4 py-2 rounded">Reserve</a>
@@ -36,14 +39,17 @@ const Navbar = () => {
       >
         {/* Main Navigation */}
         <div className="flex items-center justify-center px-6 py-3 border-b border-black space-x-6 text-[14px] bg-white">
-          <span className="font-semibold tracking-widest">ARAW SA PARAISO</span>
+        <a href="/">
+          <span  className="font-semibold tracking-widest">ARAW SA PARAISO</span>
+        </a>
+          
 
           {/* Accommodation w/ submenu */}
           <div
             onMouseEnter={() => setActiveSubmenu("accommodation")}
             className="relative"
           >
-            <a href="/accommodation" className="hover:underline">Accommodation</a>
+            <a  className="hover:underline">Accommodation</a>
           </div>
 
           {/* Experiences w/ submenu */}
