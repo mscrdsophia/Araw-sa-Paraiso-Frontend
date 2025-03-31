@@ -1,5 +1,5 @@
 import React from 'react';
-import videoSource from '/video.mp4';
+import videoSource from '../assets/video/video.mp4';
 
 function LocalVideoPlayer() {
   return (

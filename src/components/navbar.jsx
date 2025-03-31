@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Logo from '../src/assets/Logo 2.png';
+import Logo from '../assets/Logo 2.png';
 
 const Navbar = () => {
-  const [activeSubmenu, setActiveSubmenu] = useState(null); // "experiences" | "accommodation" | null
+  const [activeSubmenu, setActiveSubmenu] = useState(null); 
 
   return (
     <div className="text-[#2e2e2e] text-sm font-sans relative z-50">
@@ -66,8 +66,8 @@ const Navbar = () => {
             className="flex items-center justify-center px-6 py-3 border-b border-black space-x-6 text-[14px] bg-white transition-all duration-200"
             onMouseEnter={() => setActiveSubmenu("accommodation")}
           >
-            <a href="/accommodation#villas" className="hover:underline">Villas</a>
-            <a href="/accommodation#suites" className="hover:underline">Suites</a>
+            <a href="/villas" className="hover:underline">Villas</a>
+            <a href="/casitas" className="hover:underline">Casitas</a>
         
           </div>
         )}
