@@ -1,7 +1,7 @@
 import { Router } from "react-router-dom";
 import Navbar from "./navbar";
 import HeroCarousel from "./HeroCarousel";
-import VideoPlayer from "/components/VideoPlayer";
+import VideoPlayer from "./VideoPlayer";
 
 
 
