@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import { RoomContext } from "../context/RoomContext";
-import { Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import RoomCollection from "../components/RoomCollection";
 
