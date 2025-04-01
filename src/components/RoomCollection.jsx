@@ -9,14 +9,16 @@ export default function RoomCollection({
 }) {
   const [currentImageIndices, setCurrentImageIndices] = useState({});
 
-  const handleNextImage = (roomId, imageCount) => {
+  const handleNextImage = (roomId, imageCount, e) => {
+    e.stopPropagation();
     setCurrentImageIndices(prev => ({
       ...prev,
       [roomId]: ((prev[roomId] || 0) + 1) % imageCount
     }));
   };
 
-  const handlePrevImage = (roomId, imageCount) => {
+  const handlePrevImage = (roomId, imageCount, e) => {
+    e.stopPropagation();
     setCurrentImageIndices(prev => ({
       ...prev,
       [roomId]: ((prev[roomId] || 0) - 1 + imageCount) % imageCount
@@ -24,22 +26,22 @@ export default function RoomCollection({
   };
 
   return (
-    
     <section className="mb-16">
       {title && <h2 className="text-3xl font-bold mb-8 text-gray-800">{title}</h2>}
       
       {rooms?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2  gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {rooms.map(room => {
             const currentIndex = currentImageIndices[room._id] || 0;
             const hasMultipleImages = room.image?.length > 1;
             
             return (
-              <div 
+              <Link 
+               to={`/rooms/${room._id}`} 
                 key={room._id} 
-                className="rounded-lg overflow-hidden  transition-transform hover:shadow-xl hover:-translate-y-1"
+                className="rounded-lg overflow-hidden  transition-transform hover:shadow-xl hover:-translate-y-1 block"
               >
-                <div className="relative h-[400px] md:h-[500px]">
+                <div className="relative h-[400px] md:h-[500px] group">
                   <img 
                     src={room.image?.[currentIndex] || "/default-room.jpg"} 
                     alt={room.roomName} 
@@ -53,15 +55,15 @@ export default function RoomCollection({
                   {hasMultipleImages && (
                     <>
                       <button 
-                        onClick={() => handlePrevImage(room._id, room.image.length)}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition"
+                        onClick={(e) => handlePrevImage(room._id, room.image.length, e)}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition opacity-0 group-hover:opacity-100"
                         aria-label="Previous image"
                       >
                         &#8249;
                       </button>
                       <button 
-                        onClick={() => handleNextImage(room._id, room.image.length)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition"
+                        onClick={(e) => handleNextImage(room._id, room.image.length, e)}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition opacity-0 group-hover:opacity-100"
                         aria-label="Next image"
                       >
                         &#8250;
@@ -79,22 +81,15 @@ export default function RoomCollection({
                   )}
                 </div>
                 
-                <div className=" flex flex-col p-6 ">
+                <div className="flex flex-col p-6">
                   <h3 className="text-2xl font-serif font-medium mb-2 text-gray-800">
                     {room.roomName}
                   </h3>
                   <p className="text-gray-600 italic mb-4">
-                    {room.shortDescription || fallbackDescription}
+                    {room.shortDescription}
                   </p>
-                  
-                  {/* <Link 
-                    to={`${basePath}/${room._id}`} 
-                    className="mt-2 inline-block bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded transition font-medium"
-                  >
-                    View Details
-                  </Link> */}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
