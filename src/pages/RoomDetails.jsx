@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useContext } from "react";
 import { RoomContext } from "../context/RoomContext";
 import RoomGallery from "../components/RoomGallery";
+import Navbar from "../components/navbar";
 
 export default function RoomDetails() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ export default function RoomDetails() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+    <Navbar />
       <h1 className="text-3xl font-bold mb-6">{room.roomName}</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
