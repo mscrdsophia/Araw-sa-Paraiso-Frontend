@@ -15,7 +15,7 @@ export default function RoomDetails() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
     <Navbar />
-      <h1 className="text-3xl font-bold mb-6">{room.roomName}</h1>
+      <h1 className="text-3xl font-bold mb-6 mt-8 ">{room.roomName}</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
