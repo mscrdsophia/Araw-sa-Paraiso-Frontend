@@ -20,7 +20,7 @@ export default function RoomGallery({ room }) {
         src={room.image[currentIndex]}
         alt={room.roomName}
         className="w-full h-full object-cover cursor-pointer"
-        onClick={() => navigate(`/${room.roomType.toLowerCase()}/${room._id}`)}
+        onClick={() => navigate(`/rooms/${room._id}`)}
       />
       
       {room.image.length > 1 && (
