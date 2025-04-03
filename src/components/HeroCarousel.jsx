@@ -4,8 +4,7 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/pagination';
 import { FreeMode, Pagination } from 'swiper/modules';
-import { Modal } from 'react-responsive-modal';
-import 'react-responsive-modal/styles.css';
+
 
 import Image1 from '../assets/images/image1.jpg';
 import Image2 from '../assets/images/image2.jpg';
@@ -83,7 +82,7 @@ const ImageGallery = () => {
         ))}
       </Swiper>
 
-      {/* Modal with responsive sizing */}
+      {/* Modal with responsive sizing
       <Modal
         open={open}
         onClose={onCloseModal}
@@ -117,7 +116,7 @@ const ImageGallery = () => {
             className={`${isMobile ? 'max-h-[70vh]' : 'max-h-[80vh]'} max-w-full rounded-lg object-contain`}
           />
         </div>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
