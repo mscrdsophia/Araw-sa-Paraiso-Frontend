@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { RoomContext } from "../context/RoomContext";
 import Navbar from "../components/navbar";
 import RoomCollection from "../components/RoomCollection";
+import Footer from "../components/Footer";
 
 function Casitas() {
   const { rooms, loading, error } = useContext(RoomContext);
@@ -114,6 +115,7 @@ function Casitas() {
         fallbackDescription="Experience luxury in our private casitas."
         basePath="/casitas"
       />
+     
     </div>
   
   );

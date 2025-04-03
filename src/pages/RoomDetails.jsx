@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { RoomContext } from "../context/RoomContext";
 import RoomGallery from "../components/RoomGallery";
 import Navbar from "../components/navbar";
+import Footer from "../components/Footer";
 
 export default function RoomDetails() {
   const { id } = useParams();
@@ -51,6 +52,7 @@ export default function RoomDetails() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
