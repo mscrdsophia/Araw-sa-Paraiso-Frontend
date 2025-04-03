@@ -2,6 +2,7 @@ import { Router } from "react-router-dom";
 import Navbar from "./navbar";
 import HeroCarousel from "./HeroCarousel";
 import VideoPlayer from "./VideoPlayer";
+import Footer from "./Footer";
 
 
 
@@ -22,6 +23,7 @@ function homePage() {
         </p>
       </div>
       <HeroCarousel />
+      <Footer />
     </div>
   );
 }
