@@ -1,8 +1,7 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Logo from "../assets/Logo 2.png";
-
+import { AuthContext } from "../context/auth.context"; // Import AuthContext
 
 function SignUp() {
     const [email, setEmail] = useState("");
@@ -42,17 +41,7 @@ function SignUp() {
     
     
         return (
-          
-          <div 
-          className="min-h-screen flex items-center justify-center p-4 relative absolute inset-0  bg-opacity-10 backdrop-blur-sm " 
-          style={{
-              backgroundImage: `url(${Logo})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-          }}
-      >
-       
+            <div className ="">
               <section className="rounded-md p-2 bg-white">
                 <div className="flex items-center justify-center my-3">
                   <div className="xl:mx-auto shadow-md p-4 xl:w-full xl:max-w-sm 2xl:max-w-md">
@@ -61,7 +50,7 @@ function SignUp() {
                       Sign up to create account
                     </h2>
                     <p className="mt-2 text-base text-gray-600">
-                      Already have an account? <Link to="/login" className="text-sm text-blue-500 hover:underline">Log in</Link>
+                      Already have an account? Sign In
                     </p>
                     <form className="mt-5" onSubmit={handleSignupSubmit}>
                       <div className="space-y-4">

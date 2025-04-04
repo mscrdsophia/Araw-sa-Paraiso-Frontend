@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Logo from '../assets/Logo 2.png';
+import User from '../assets/images/user.png';
 
 const Navbar = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
@@ -31,28 +32,34 @@ const Navbar = () => {
   };
 
   return (
-    <div className="text-[#2e2e2e] text-sm font-sans relative z-50">
+    <div className="text-[#2e2e2e] text-sm font-sans relative z-50 bg-white">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-black">
-        <div className="flex items-center space-x-4">
-          <button onClick={toggleMobileMenu} className="md:hidden">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-          </button>
-          <span className="hidden md:inline">Menu</span>
-          <svg className="w-5 h-5 ml-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8" strokeWidth="2" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+        {/* Mobile menu button */}
+        <button onClick={toggleMobileMenu} className="md:hidden">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
+        </button>
+
+        <a href="/login" className="flex items-center space-x-2">
+            <img src={User} alt="User Icon" className="w-5 h-5" />
+            <span className="text-sm hidden md:inline">Login</span>
+          </a>
+
+        {/* Logo - centered */}
+        <div className="flex-1 flex justify-center md:flex-none">
+          <a href="/">
+            <img src={Logo} alt="Hotel Logo" className="h-10 md:h-14" />
+          </a>
         </div>
 
-        {/* Logo */}
-        <a href="/">
-          <img src={Logo} alt="Hotel Logo" className="h-10 md:h-14" />
-        </a>
-
+        {/* Right side buttons - login and reserve */}
         <div className="flex items-center space-x-4">
+          {/* Login button - always visible */}
+          
+          
+          {/* Reserve button */}
           <a href="/reserve" className="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm">
             Reserve
           </a>
@@ -83,8 +90,18 @@ const Navbar = () => {
           </button>
         )}
 
+        {/* Mobile login button inside menu */}
+        {isMobileView && (
+          <div className="px-4 pt-12 pb-4 border-b border-gray-200">
+            <a href="/login" className="flex items-center space-x-2 text-lg">
+              <img src={User} alt="User Icon" className="w-6 h-6" />
+              <span>Login</span>
+            </a>
+          </div>
+        )}
+
         {/* Main Navigation */}
-        <div className={`flex ${isMobileView ? 'flex-col items-start px-4 py-8 space-y-4' : 'items-center justify-center px-6 py-3 border-b border-black space-x-6'} text-[14px] bg-white`}>
+        <div className={`flex ${isMobileView ? 'flex-col items-start px-4 py-4 space-y-4' : 'items-center justify-center px-6 py-3 border-b border-black space-x-6'} text-[14px] bg-white`}>
           <a href="/" className={`${isMobileView ? 'w-full py-2 text-lg' : ''}`}>
             <span className="font-semibold tracking-widest">ARAW SA PARAISO</span>
           </a>
