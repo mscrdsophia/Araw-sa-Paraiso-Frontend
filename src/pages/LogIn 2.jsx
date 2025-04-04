@@ -2,12 +2,12 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
-import Logo from "../assets/Logo 2.png";
 
 function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(undefined);
+  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
@@ -35,13 +35,7 @@ function LogIn() {
 }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative absolute inset-0  bg-opacity-10 backdrop-blur-sm " 
-              style={{
-                  backgroundImage: `url(${Logo})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-              }}>
+    <div className="flex flex-col items-center justify-center h-screen">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Login</h2>
         
@@ -74,7 +68,7 @@ function LogIn() {
             <p className="text-gray-900 mt-4">Don't have an account?  
               <Link to="/signup" className="text-sm text-blue-500 hover:underline">Sign up</Link>
             </p>
-            <button type="submit" className=" bg-black text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">
+            <button type="submit" className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">
               Login
             </button>
           </form>

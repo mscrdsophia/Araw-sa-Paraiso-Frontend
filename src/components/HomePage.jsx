@@ -22,7 +22,7 @@ function homePage() {
           Escape to <span className="font-semibold text-amber-800">Araw sa Paraiso</span>, a tranquil haven where golden sunrises greet you and warm hospitality feels like home. Nestled in a serene location, our hotel blends modern comfort with the vibrant energy of tropical living. Whether you're here to unwind by the pool, explore local gems, or simply relax in your cozy, sunlit room, every moment at Araw sa Paraiso is designed to rejuvenate your mind, body, and spirit.
         </p>
       </div>
-      {/* <HeroCarousel /> */}
+      <HeroCarousel />
       <Footer />
     </div>
   );
