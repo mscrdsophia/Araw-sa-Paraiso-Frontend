@@ -5,10 +5,15 @@ import { RoomContext } from "../context/RoomContext";
 import RoomGallery from "../components/RoomGallery";
 import Navbar from "../components/navbar";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../context/auth.context";
+
+
 
 export default function RoomDetails() {
   const { id } = useParams();
   const { rooms } = useContext(RoomContext);
+  const { user } = useContext(AuthContext);
   const room = rooms.find(r => r._id === id);
 
   if (!room) return <div className="p-8 text-center">Room not found</div>;
@@ -46,9 +51,13 @@ export default function RoomDetails() {
             <p className="text-2xl text-amber-700 font-bold">
               ${room.roomPrice?.toLocaleString()} <span className="text-lg text-gray-600">/ night</span>
             </p>
-            <button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-medium">
+
+            {user && <Link to={`/booking/${room._id}/${user._id}`} >
+               <button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-medium">
               Book Now
             </button>
+            </Link>}
+           
           </div>
         </div>
       </div>
