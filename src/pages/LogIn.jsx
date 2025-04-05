@@ -24,13 +24,13 @@ function LogIn() {
 
     axios.post(`${API_URL}/auth/api/login`, { email, password })
       .then((response) => {
-        setLoading(false);
+        
         storedToken(response.data.authToken);
         navigate("/booking");
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
-        setLoading(false);
+       
       });
 }
 
