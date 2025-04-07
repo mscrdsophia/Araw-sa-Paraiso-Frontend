@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; // Import useParams
 import { AuthContext } from "../context/auth.context";
 
 function AccPage() {
+  const { userId } = useParams(); // Retrieve userId from route parameters
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,29 +12,33 @@ function AccPage() {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "", // Change from "phone" to "phoneNumber"
   });
-  
-  const { authToken, setStoredToken } = useContext(AuthContext);
+
+  const { authToken, setStoredToken } = useContext(AuthContext); // Ensure setStoredToken is destructured
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
   console.log("API URL:", API_URL); // Debug API URL
-  console.log("Auth Token present:", !!authToken); // Check if token exists
+  console.log("Auth Token present:", localStorage.getItem("authTokens")); // Check if token exists
+  console.log("User ID from route:", userId); // Debug userId
 
-  const handleInputChange = (e) => { 
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdateFormData({ ...updateFormData, [name]: value });
   };
 
   const handleUpdateProfile = () => {
+    console.log("currentUser:", currentUser); // Debugging line
     if (!currentUser) return;
-    
+
     setIsLoading(true);
-    axios.put(`${API_URL}/api/users/${currentUser.id}`, 
-      { user: updateFormData }, // Wrap in user object if needed
-      { headers: { Authorization: `Bearer ${authToken}` } }
-    )
+    axios
+      .put(
+        `${API_URL}/api/users/${currentUser._id}`, // Use _id instead of id
+        updateFormData, // Send updateFormData directly
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      )
       .then((response) => {
         setCurrentUser(response.data);
         setIsLoading(false);
@@ -49,25 +54,34 @@ function AccPage() {
   };
 
   const handleDeleteAccount = () => {
-    if (!currentUser || !confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (
+      !currentUser ||
+      !confirm("Are you sure you want to delete your account? This action cannot be undone.")
+    ) {
       return;
     }
 
+    console.log("Deleting account for user ID:", currentUser._id); // Debug user ID
+    console.log("Auth Token:", authToken); // Debug auth token
+
     setIsLoading(true);
     axios
-      .delete(`${API_URL}/api/users/${currentUser.id}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+      .delete(`${API_URL}/api/users/${currentUser._id}`, {
+        headers: { Authorization: `Bearer ${authToken}` }, // Ensure token is sent
       })
       .then(() => {
-        setStoredToken(null);
-        navigate("/");
+        alert("Account deleted successfully");
+        setStoredToken(null); // Clear the stored token
+        setCurrentUser(null); // Clear the current user state
+        setIsLoading(false); // Ensure loading state is reset
+       
       })
       .catch((error) => {
         const errorMsg = error.response?.data?.message || "Error deleting account";
-        console.error("Error deleting account:", error);
+        console.error("Error deleting account:", error); // Log the error
         setError(errorMsg);
         setIsLoading(false);
-        alert(errorMsg);
+         navigate("/"); 
       });
   };
 
@@ -77,29 +91,30 @@ function AccPage() {
   };
 
   // Try alternate API endpoints if needed
-  const fetchUserByEndpoints = async ( currentUser ) => {
+  const fetchUserByEndpoints = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     if (!authToken) {
       setError("No authentication token available");
       setIsLoading(false);
       return;
     }
+
     try {
-      const response = await axios.get(`${API_URL}/api/users`, {
+      const response = await axios.get(`${API_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       console.log("User data fetched successfully:", response.data);
-      console.log("Current User ID:", currentUser?.id); // Debugging line
-      const user = response.data.find((user) => user.id === currentUser?.id);
+
+      const user = response.data;
       if (user) {
         setCurrentUser(user);
         setUpdateFormData({
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          phone: user.phone || "",
+          phoneNumber: user.phoneNumber || "", // Update to match backend field
         });
       } else {
         setError("User not found");
@@ -116,7 +131,7 @@ function AccPage() {
   useEffect(() => {
     fetchUserByEndpoints();
     
-  }, [authToken]);
+  }, [authToken, userId]); // Add userId as a dependency
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
@@ -159,7 +174,7 @@ function AccPage() {
               <h3 className="text-lg font-medium mb-2">Account Information</h3>
               <p><strong>Name:</strong> {currentUser.firstName} {currentUser.lastName}</p>
               <p><strong>Email:</strong> {currentUser.email}</p>
-              <p><strong>Phone:</strong> {currentUser.phone || "Not provided"}</p>
+              <p><strong>Phone:</strong> {currentUser.phoneNumber || "Not provided"}</p>
               <p className="text-xs text-gray-500 mt-2">User ID: {currentUser._id}</p>
             </div>
             
@@ -200,8 +215,8 @@ function AccPage() {
                   <label className="block text-sm font-medium text-gray-700">Phone</label>
                   <input
                     type="text"
-                    name="phone"
-                    value={updateFormData.phone}
+                    name="phoneNumber" // Update name to "phoneNumber"
+                    value={updateFormData.phoneNumber} // Update to match state
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                   />
