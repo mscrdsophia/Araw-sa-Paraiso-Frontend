@@ -30,10 +30,10 @@ function AccPage() {
     if (!currentUser) return;
     
     setIsLoading(true);
-    axios
-      .put(`${API_URL}/api/users/${currentUser._id}`, updateFormData, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      })
+    axios.put(`${API_URL}/api/users/${currentUser.id}`, 
+      { user: updateFormData }, // Wrap in user object if needed
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    )
       .then((response) => {
         setCurrentUser(response.data);
         setIsLoading(false);
@@ -55,7 +55,7 @@ function AccPage() {
 
     setIsLoading(true);
     axios
-      .delete(`${API_URL}/api/users/${currentUser._id}`, {
+      .delete(`${API_URL}/api/users/${currentUser.id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       .then(() => {
@@ -77,7 +77,7 @@ function AccPage() {
   };
 
   // Try alternate API endpoints if needed
-  const fetchUserByEndpoints = async () => {
+  const fetchUserByEndpoints = async ( currentUser ) => {
     setIsLoading(true);
     setError(null);
     
@@ -86,55 +86,28 @@ function AccPage() {
       setIsLoading(false);
       return;
     }
-    
-    const authHeader = { Authorization: `Bearer ${authToken}` };
-    
     try {
-      // Try multiple potential endpoints to find the right one
-      const endpoints = [
-        `${API_URL}/api/users/profile`,
-        `${API_URL}/api/users/me`,
-        `${API_URL}/auth/api/users/profile`,
-        `${API_URL}/auth/api/users/me`,
-        `${API_URL}/api/user`,
-        `${API_URL}/auth/api/user`
-      ];
-      
-      let userData = null;
-      let successEndpoint = '';
-      
-      for (const endpoint of endpoints) {
-        try {
-          console.log(`Trying endpoint: ${endpoint}`);
-          const response = await axios.get(endpoint, { headers: authHeader });
-          if (response.data) {
-            userData = response.data;
-            successEndpoint = endpoint;
-            console.log(`Success with endpoint: ${endpoint}`);
-            break;
-          }
-        } catch (err) {
-          console.log(`Failed with endpoint ${endpoint}:`, err.message);
-          // Continue to next endpoint
-        }
-      }
-      
-      if (userData) {
-        console.log("User data found:", userData);
-        console.log("Working endpoint:", successEndpoint);
-        setCurrentUser(userData);
+      const response = await axios.get(`${API_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      console.log("User data fetched successfully:", response.data);
+      console.log("Current User ID:", currentUser?.id); // Debugging line
+      const user = response.data.find((user) => user.id === currentUser?.id);
+      if (user) {
+        setCurrentUser(user);
         setUpdateFormData({
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          email: userData.email || "",
-          phone: userData.phone || "",
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone || "",
         });
       } else {
-        throw new Error("Could not fetch user data from any endpoint");
+        setError("User not found");
       }
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      setError(error.message);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Error fetching user data";
+      console.error("Error fetching user data:", err);
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -142,6 +115,7 @@ function AccPage() {
 
   useEffect(() => {
     fetchUserByEndpoints();
+    
   }, [authToken]);
 
   return (
