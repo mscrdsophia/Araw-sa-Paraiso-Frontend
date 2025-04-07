@@ -23,7 +23,7 @@ function App() {
     <Route path="/signup" element={<SignUp />} />
     <Route path="/login" element={<LogIn />} />
     <Route path="/booking/:roomId/:userId" element={<DatePicker />} />
-    <Route path="/accounts" element={<AccPage />} />
+    <Route path="/accounts/:userId" element={<AccPage />} />
   </Routes>
    
     
