@@ -26,7 +26,7 @@ function LogIn() {
       .then((response) => {
         
         storedToken(response.data.authToken);
-        navigate("/booking");
+        navigate("/");
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
