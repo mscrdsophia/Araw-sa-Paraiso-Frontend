@@ -8,25 +8,27 @@ export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null); // Current user
   const [loading, setLoading] = useState(true); // Loading state
+  const [authToken, setAuthToken] = useState(null);
  const API_URL = import.meta.env.VITE_API_URL; // API URL
 
   // Function to store the user in localStorage
-  const storedToken = (authToken) => {
-    localStorage.setItem("authToken", authToken);
+  const storedToken = (token) => {
+    localStorage.setItem("authToken", token);
+    setAuthToken(token)
     
   };
 
 
   const authenticateUser = () => {           //  <==  ADD  
     // Get the stored token from the localStorage
-    const storedToken = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem('authToken');
     // If the token exists in the localStorage
-    if (storedToken) {
+    if (token) {
+      setAuthToken(token);
       // We must send the JWT token in the request's "Authorization" Headers
       axios.get(
         `${API_URL}/auth/api/verify`, 
-        { headers: { Authorization: `Bearer ${storedToken}`} }
+        { headers: { Authorization: `Bearer ${token}`} }
       )
       .then((response) => {
         // If the server verifies that the JWT token is valid  
@@ -71,6 +73,7 @@ export function AuthProvider({ children }) {
         loading,
         isLoggedIn, // Provide isLoggedIn
         storedToken,
+        authToken,
         authenticateUser,
         logOutUser,
        // Add the updateUser function
