@@ -100,11 +100,7 @@ const StyleDatePicker = () => {
 
         },
         body: JSON.stringify({
-          // checkinDate: { $date: { $numberLong: checkInDate.toISOString()} },
-          // checkoutDate: { $date: { $numberLong: checkOutDate.toISOString()} },
-          // request: specialRequests,
-          // userId: { $oid: userId },
-          // roomId: [{ $oid: roomId }],
+       
           checkinDate:checkInDate.toISOString(),
           checkoutDate:checkOutDate.toISOString(),
           request: specialRequests,
