@@ -19,37 +19,31 @@ export function AuthProvider({ children }) {
   };
 
 
-  const authenticateUser = () => {           //  <==  ADD  
-    // Get the stored token from the localStorage
+  const authenticateUser = () => {
     const token = localStorage.getItem('authToken');
-    // If the token exists in the localStorage
     if (token) {
       setAuthToken(token);
-      // We must send the JWT token in the request's "Authorization" Headers
       axios.get(
         `${API_URL}/auth/api/verify`, 
         { headers: { Authorization: `Bearer ${token}`} }
       )
       .then((response) => {
-        // If the server verifies that the JWT token is valid  
         const user = response.data;
-       // Update state variables        
         setIsLoggedIn(true);
         setLoading(false);
-        setUser(user);        
+        setUser(user); // Store the complete user object
+        console.log("Authenticated user:", user);
       })
       .catch((error) => {
-        // If the server sends an error response (invalid token) 
-        // Update state variables         
         setIsLoggedIn(false);
         setLoading(false);
-        setUser(null);        
+        setUser(null);    
+        console.error("Error verifying token:", error);
       });      
     } else {
-      // If the token is not available (or is removed)
-        setIsLoggedIn(false);
-        setLoading(false);
-        setUser(null);      
+      setIsLoggedIn(false);
+      setLoading(false);
+      setUser(null);    
     }   
   }
 
