@@ -50,7 +50,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-2">
             <img src={User} alt="User" className="w-5 h-5" />
             <Link to={`/accounts/${user._id}`}>
-            <span className="text-sm hidden md:inline">{user?.email}</span>
+            <span className="text-sm hidden md:inline">{user?.firstName}</span>
             </Link>
           </div>
         ) : (
@@ -99,7 +99,7 @@ const Navbar = () => {
               <Link to={`/accounts/${user._id}`}>
                 <img src={User} alt="User" className="w-6 h-6" />
                 
-                   <span>{user?.email}</span>
+                   <span>{user?.firstName}</span>
                 </Link>
                
               </div>
