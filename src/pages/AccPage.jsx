@@ -14,13 +14,14 @@ function AccPage() {
     email: "",
     phoneNumber: "", // Change from "phone" to "phoneNumber"
   });
+  const [bookings, setBookings] = useState([]); // State to store user bookings
 
   const { authToken, setStoredToken } = useContext(AuthContext); // Ensure setStoredToken is destructured
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
   console.log("API URL:", API_URL); // Debug API URL
-  console.log("Auth Token present:", localStorage.getItem("authTokens")); // Check if token exists
+  console.log("Auth Token present:", localStorage.getItem("authToken")); // Check if token exists
   console.log("User ID from route:", userId); // Debug userId
 
   const handleInputChange = (e) => {
@@ -86,7 +87,8 @@ function AccPage() {
   };
 
   const handleLogout = () => {
-    setStoredToken(null);
+    setStoredToken(null); // Clear the stored token
+    setCurrentUser(null); // Clear the current user state
     navigate("/");
   };
 
@@ -116,13 +118,30 @@ function AccPage() {
           email: user.email,
           phoneNumber: user.phoneNumber || "", // Update to match backend field
         });
-      } else {
-        setError("User not found");
-      }
+      } 
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Error fetching user data";
       console.error("Error fetching user data:", err);
-      setError(errorMsg);
+     
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch user bookings
+  const fetchUserBookings = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`${API_URL}/api/bookings/user/${userId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setBookings(response.data); // Store bookings in state
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Error fetching bookings";
+      console.error("Error fetching bookings:", err);
+      
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +149,7 @@ function AccPage() {
 
   useEffect(() => {
     fetchUserByEndpoints();
-    
+    fetchUserBookings(); // Fetch bookings when component loads
   }, [authToken, userId]); // Add userId as a dependency
 
   return (
@@ -144,7 +163,7 @@ function AccPage() {
           </div>
         ) : error ? (
           <div className="text-center py-4">
-            <p className="text-red-500">Error: {error}</p>
+        
             <div className="mt-4 p-4 bg-gray-100 rounded text-left">
               <p className="font-bold">Debugging Information:</p>
               <p>API URL: {API_URL}</p>
@@ -245,6 +264,27 @@ function AccPage() {
               >
                 Logout
               </button>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">My Bookings</h3>
+              {isLoading ? (
+                <p>Loading bookings...</p>
+              ) : bookings.length > 0 ? (
+                <ul className="space-y-4">
+                  {bookings.map((booking) => (
+                    <li key={booking._id} className="p-4 bg-gray-50 rounded-lg">
+                      <p><strong>Room ID:</strong> {booking.roomId}</p>
+                      <p><strong>Check-in:</strong> {new Date(booking.checkinDate).toLocaleDateString()}</p>
+                      <p><strong>Check-out:</strong> {new Date(booking.checkoutDate).toLocaleDateString()}</p>
+                      <p><strong>Guests:</strong> {booking.adultGuest} Adults, {booking.childrenGuest} Children</p>
+                      <p><strong>Special Requests:</strong> {booking.request || "None"}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No bookings found.</p>
+              )}
             </div>
           </div>
         ) : (
