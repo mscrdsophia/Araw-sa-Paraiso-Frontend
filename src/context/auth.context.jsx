@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
   // Function to store the user in localStorage
   const storedToken = (token) => {
     localStorage.setItem("authToken", token);
+    console.log("Token in localStorage:", localStorage.getItem("authToken"));
     setAuthToken(token)
     
   };
