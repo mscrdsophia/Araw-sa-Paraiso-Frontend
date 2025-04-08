@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import Logo from '../assets/Logo 2.png';
 import User from '../assets/images/user.png';
+import { AuthContext } from '../context/auth.context';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
+   // Destructure only what you need from context
+   const { isLoggedIn, user } = useContext(AuthContext);
 
   useEffect(() => {
-    const handleResize = () => {
+      const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
@@ -42,61 +46,69 @@ const Navbar = () => {
           </svg>
         </button>
 
-        <a href="/login" className="flex items-center space-x-2">
-            <img src={User} alt="User Icon" className="w-5 h-5" />
+        {isLoggedIn ? (
+          <div className="flex items-center space-x-2">
+            <img src={User} alt="User" className="w-5 h-5" />
+            <Link to={`/accounts/${user._id}`}>
+            <span className="text-sm hidden md:inline">{user?.email}</span>
+            </Link>
+          </div>
+        ) : (
+          <a href="/login" className="flex items-center space-x-2">
+            <img src={User} alt="Login" className="w-5 h-5" />
             <span className="text-sm hidden md:inline">Login</span>
           </a>
+        )}
 
-        {/* Logo - centered */}
         <div className="flex-1 flex justify-center md:flex-none">
           <a href="/">
             <img src={Logo} alt="Hotel Logo" className="h-10 md:h-14" />
           </a>
         </div>
 
-        {/* Right side buttons - login and reserve */}
         <div className="flex items-center space-x-4">
-          {/* Login button - always visible */}
-          
-          
-          {/* Reserve button */}
           <a href="/reserve" className="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm">
             Reserve
           </a>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && isMobileView && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu}></div>
       )}
 
-      {/* Wrapper for nav and submenu */}
       <div
         className={`w-full ${isMobileView ? 'fixed top-0 left-0 h-full bg-white z-50 transform transition-transform duration-300 ease-in-out' : ''} ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0 md:bg-transparent`}
-        onMouseLeave={() => !isMobileView && setActiveSubmenu(null)}
       >
-        {/* Close button for mobile */}
         {isMobileView && (
-          <button
-            onClick={toggleMobileMenu}
-            className="absolute top-4 right-4 p-2 md:hidden"
-          >
+          <button onClick={toggleMobileMenu} className="absolute top-4 right-4 p-2 md:hidden">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         )}
 
-        {/* Mobile login button inside menu */}
+        {/* Mobile user section */}
         {isMobileView && (
           <div className="px-4 pt-12 pb-4 border-b border-gray-200">
-            <a href="/login" className="flex items-center space-x-2 text-lg">
-              <img src={User} alt="User Icon" className="w-6 h-6" />
-              <span>Login</span>
-            </a>
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-2 text-lg">
+              <Link to={`/accounts/${user._id}`}>
+                <img src={User} alt="User" className="w-6 h-6" />
+                
+                   <span>{user?.email}</span>
+                </Link>
+               
+              </div>
+            ) : (
+              <a href="/login" className="flex items-center space-x-2 text-lg">
+                <img src={User} alt="Login" className="w-6 h-6" />
+                <span>Login</span>
+              </a>
+            )}
           </div>
         )}
 
