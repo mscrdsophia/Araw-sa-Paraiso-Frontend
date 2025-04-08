@@ -16,7 +16,7 @@ function AccPage() {
   });
   const [bookings, setBookings] = useState([]); // State to store user bookings
 
-  const { authToken, setStoredToken } = useContext(AuthContext); // Ensure setStoredToken is destructured
+  const { authToken, logOutUser} = useContext(AuthContext); // Ensure setStoredToken is destructured
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -87,9 +87,9 @@ function AccPage() {
   };
 
   const handleLogout = () => {
-    setStoredToken(null); // Clear the stored token
-    setCurrentUser(null); // Clear the current user state
-    navigate("/");
+    localStorage.removeItem("user");
+    logOutUser();
+    navigate("/login");
   };
 
   // Try alternate API endpoints if needed
@@ -97,6 +97,7 @@ function AccPage() {
     setIsLoading(true);
     setError(null);
 
+    const token = localStorage.getItem("authToken");
     if (!authToken) {
       setError("No authentication token available");
       setIsLoading(false);
@@ -105,7 +106,7 @@ function AccPage() {
 
     try {
       const response = await axios.get(`${API_URL}/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       console.log("User data fetched successfully:", response.data);
 
@@ -132,10 +133,11 @@ function AccPage() {
   const fetchUserBookings = async () => {
     setIsLoading(true);
     setError(null);
-
+    const token = localStorage.getItem("authToken");
+console.log("token", token)
     try {
       const response = await axios.get(`${API_URL}/api/bookings/user/${userId}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { Authorization: `Bearer ${token}` }, 
       });
       setBookings(response.data); // Store bookings in state
     } catch (err) {
@@ -150,7 +152,8 @@ function AccPage() {
   useEffect(() => {
     fetchUserByEndpoints();
     fetchUserBookings(); // Fetch bookings when component loads
-  }, [authToken, userId]); // Add userId as a dependency
+  }, []); // Add userId as a dependency
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
@@ -274,7 +277,7 @@ function AccPage() {
                 <ul className="space-y-4">
                   {bookings.map((booking) => (
                     <li key={booking._id} className="p-4 bg-gray-50 rounded-lg">
-                      <p><strong>Room ID:</strong> {booking.roomId}</p>
+                      <p><strong>Room name:</strong> {booking.roomId.roomName}</p>
                       <p><strong>Check-in:</strong> {new Date(booking.checkinDate).toLocaleDateString()}</p>
                       <p><strong>Check-out:</strong> {new Date(booking.checkoutDate).toLocaleDateString()}</p>
                       <p><strong>Guests:</strong> {booking.adultGuest} Adults, {booking.childrenGuest} Children</p>
@@ -304,3 +307,4 @@ function AccPage() {
 }
 
 export default AccPage;
+

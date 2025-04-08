@@ -107,7 +107,8 @@ const StyleDatePicker = () => {
           userId: userId,
           roomId: roomId,
           adultGuest: guests.adults,
-          childrenGuest: guests.children
+          childrenGuest: guests.children,
+          roomName: roomName
         })
       });
 
