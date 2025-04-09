@@ -3,7 +3,7 @@ import { format, addMonths, subMonths, isBefore, isAfter, isSameDay, isWithinInt
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useParams } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 
 const StyleDatePicker = () => {
   // State management
@@ -16,7 +16,7 @@ const StyleDatePicker = () => {
   const [error, setError] = useState(null);
   const [specialRequests, setSpecialRequests] = useState('');
   const { roomId, userId } = useParams(); // Extract roomId and userId from URL parameters
-
+  const navigate = useNavigate();
 
   const [guests, setGuests] = useState({
     adults: 2,
@@ -92,6 +92,7 @@ const StyleDatePicker = () => {
     
     try {
       const storedToken = localStorage.getItem('authToken');
+      
       const response = await fetch(`${API_URL}/api/bookings`, {
         method: 'POST',
         headers: {
@@ -108,7 +109,7 @@ const StyleDatePicker = () => {
           roomId: roomId,
           adultGuest: guests.adults,
           childrenGuest: guests.children,
-          roomName: roomName
+         
         })
       });
 
@@ -117,6 +118,7 @@ const StyleDatePicker = () => {
       const result = await response.json();
       console.log(result);
       setBookingResult(result);
+      navigate(`/accounts/:userId`)
       
       // Refresh bookings
       
