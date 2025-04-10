@@ -35,13 +35,12 @@ function LogIn() {
 }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative absolute inset-0  bg-opacity-10 backdrop-blur-sm " 
-              style={{
-                  backgroundImage: `url(${Logo})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-              }}>
+    <div> 
+    <h1>
+      Welcome to Araw sa Paraiso
+    </h1>
+    <div className="min-h-screen flex items-center justify-center p-4 relative absolute inset-0  bg-opacity-10 backdrop-blur-sm ">
+   
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Login</h2>
         
@@ -83,6 +82,7 @@ function LogIn() {
           <p className="text-red-500 text-center mt-4">{errorMessage}</p>
         )}
       </div>
+    </div>
     </div>
   );
 } 
