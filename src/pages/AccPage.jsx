@@ -57,7 +57,6 @@ function AccPage() {
       })
       .catch((error) => {
         const errorMsg = error.response?.data?.message || "Error updating profile";
-        console.error("Error updating user:", error);
         setError(errorMsg);
         setIsLoading(false);
         showToast(errorMsg);
@@ -94,7 +93,6 @@ function AccPage() {
       })
       .catch((error) => {
         const errorMsg = error.response?.data?.message || "Error deleting account";
-        console.error("Error deleting account:", error);
         setError(errorMsg);
         setIsLoading(false);
       });
@@ -131,7 +129,6 @@ function AccPage() {
       }
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Error fetching user data";
-      console.error("Error fetching user data:", err);
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +156,6 @@ function AccPage() {
       setBookings(bookingsRes.data);
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Error fetching bookings";
-      console.error("Error fetching bookings:", err);
     } finally {
       setIsLoading(false);
     }
@@ -188,7 +184,6 @@ function AccPage() {
       showToast("Booking deleted successfully.");
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Failed to delete booking";
-      console.error("Error deleting booking:", error);
       showToast(errorMsg);
     }
   };

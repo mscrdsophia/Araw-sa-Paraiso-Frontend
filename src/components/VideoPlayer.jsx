@@ -24,7 +24,7 @@ function LocalVideoPlayer() {
           if (entry.isIntersecting) {
             // Video is in viewport
             video.play().catch(error => {
-              console.log('Autoplay prevented:', error);
+             
               setShowPlayButton(true);
             });
           } else {

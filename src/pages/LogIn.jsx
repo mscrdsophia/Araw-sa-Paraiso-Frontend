@@ -1,90 +1,162 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
+import { EyeIcon, EyeOffIcon, UserIcon, KeyIcon } from 'lucide-react';
 import Logo from "../assets/Logo 2.png";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(undefined);
-  const [users, setUsers] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { storedToken } = useContext(AuthContext);
+  const { storedToken, authenticateUser } = useContext(AuthContext);
   const API_URL = import.meta.env.VITE_API_URL;
-
-
-
-  const handleEmail = (e) => setEmail(e.target.value);
-  const handlePassword = (e) => setPassword(e.target.value);
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-
     axios.post(`${API_URL}/auth/api/login`, { email, password })
-      .then((response) => {
-        
-        storedToken(response.data.authToken);
+    .then((response) => {
+      storedToken(response.data.authToken);
+      authenticateUser();
+      toast.success("Login successful! Redirecting...");
+      setTimeout(() => {
         navigate("/");
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-       
-      });
+      }, 100);
+    })
+    .catch((error) => {
+      const errorMsg = error.response?.data?.message || "Login failed. Please try again.";
+      setErrorMessage(errorMsg);
+      
+      // Show toast notification based on error type
+      if (error.response?.status === 401) {
+        toast.error("Invalid email or password");
+      } else if (error.response?.status === 404) {
+        toast.error("User not found");
+      } else {
+        toast.error(errorMsg);
+      }
+    });
 }
 
   return (
-    <div> 
-    <h1>
-      Welcome to Araw sa Paraiso
-    </h1>
-    <div className="min-h-screen flex items-center justify-center p-4 relative absolute inset-0  bg-opacity-10 backdrop-blur-sm ">
-   
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Login</h2>
-        
-          <form className="flex flex-col" onSubmit={handleLoginSubmit}>
-            <input 
-              type="email" 
-              value={email}
-              id="email"
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" 
-              placeholder="Email address" 
+    <div className="flex items-center justify-center min-h-screen w-full bg-white p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-10">
+          <div className="flex justify-center mb-6">
+            <img
+              src={Logo}
+              alt="Brand logo showing a beach scene with palm tree and sailboat"
+              className="h-16 w-16 object-contain"
             />
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              id="password"
-              required
-              className="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" 
-              placeholder="Password" 
-            />
-            <div className="flex items-center justify-between flex-wrap">
-              <label htmlFor="remember-me" className="text-sm text-gray-900 cursor-pointer">
-                <input type="checkbox" id="remember-me" className="mr-2" />
-                Remember me
-              </label>
-              <a href="#" className="text-sm text-blue-500 hover:underline">Forgot password?</a>
-            </div>
-            <p className="text-gray-900 mt-4">Don't have an account?  
-              <Link to="/signup" className="text-sm text-blue-500 hover:underline">Sign up</Link>
+          </div>
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Welcome to Araw sa Paraiso
+            </h1>
+            <p className="text-gray-500 mt-2">
+              Please enter your details to sign in
             </p>
-            <button type="submit" className=" bg-black text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">
-              Login
-            </button>
+          </div>
+          
+          <form onSubmit={handleLoginSubmit}>
+            <div className="space-y-5">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <UserIcon size={18} className="text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="Enter your email"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Password
+                  </label>
+                  
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <KeyIcon size={18} className="text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="••••••••"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon size={18} aria-hidden="true" />
+                      ) : (
+                        <EyeIcon size={18} aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Sign in
+                </button>
+              </div>
+            </div>
           </form>
-       
-        {errorMessage && (
-          <p className="text-red-500 text-center mt-4">{errorMessage}</p>
-        )}
+          
+          <div className="mt-6 text-center text-sm">
+            <span className="text-gray-500">Don't have an account?</span>{' '}
+            <Link
+              to="/signup"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Sign up
+            </Link>
+          </div>
+          
+          {errorMessage && (
+            <p className="text-red-500 text-center mt-4">{errorMessage}</p>
+          )}
+        </div>
       </div>
     </div>
-    </div>
   );
-} 
+}
 
 export default LogIn;
