@@ -15,7 +15,6 @@ export const fetchBookings = async () => {
       roomId: booking.roomId[0].$oid // Assuming one room per booking
     }));
   } catch (error) {
-    console.error('Error fetching bookings:', error);
     return [];
   }
 };
@@ -40,7 +39,6 @@ export const createBooking = async (bookingData) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error creating booking:', error);
     throw error;
   }
 };

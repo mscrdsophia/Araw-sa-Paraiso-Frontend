@@ -10,6 +10,8 @@ import LogIn from './pages/LogIn'
 import Booking from "./pages/Booking"
 import AccPage from './pages/AccPage'
 import "./App.css"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -26,7 +28,18 @@ function App() {
     <Route path="/accounts/:userId" element={<AccPage />} />
   </Routes>
    
-    
+  <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
   </div>
   )
 }
