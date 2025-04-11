@@ -14,8 +14,7 @@ export function AuthProvider({ children }) {
   // Function to store the user in localStorage
   const storedToken = (token) => {
     localStorage.setItem("authToken", token);
-    console.log("Token in localStorage:", localStorage.getItem("authToken"));
-    setAuthToken(token)
+  setAuthToken(token)
     
   };
 
@@ -33,13 +32,13 @@ export function AuthProvider({ children }) {
         setIsLoggedIn(true);
         setLoading(false);
         setUser(user); // Store the complete user object
-        console.log("Authenticated user:", user);
+        
       })
       .catch((error) => {
         setIsLoggedIn(false);
         setLoading(false);
         setUser(null);    
-        console.error("Error verifying token:", error);
+        
       });      
     } else {
       setIsLoggedIn(false);

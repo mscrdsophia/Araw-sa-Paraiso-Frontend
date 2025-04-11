@@ -3,7 +3,7 @@ import { format, addMonths, subMonths, isBefore, isAfter, isSameDay, isWithinInt
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useParams } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 
 const StyleDatePicker = () => {
   // State management
@@ -16,7 +16,7 @@ const StyleDatePicker = () => {
   const [error, setError] = useState(null);
   const [specialRequests, setSpecialRequests] = useState('');
   const { roomId, userId } = useParams(); // Extract roomId and userId from URL parameters
-
+  const navigate = useNavigate();
 
   const [guests, setGuests] = useState({
     adults: 2,
@@ -45,7 +45,6 @@ const StyleDatePicker = () => {
         setBookings(formattedBookings);
       } catch (err) {
         setError('Failed to load booking data');
-        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -84,9 +83,6 @@ const StyleDatePicker = () => {
 
   // Create booking
   const handleBookNow = async () => {
-    console.log("working")
-    // if (!checkInDate || !checkOutDate || !userId || !roomId) return;
-
     setIsLoading(true);
     setError(null);
     
@@ -97,25 +93,24 @@ const StyleDatePicker = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${storedToken}`,
-
         },
         body: JSON.stringify({
-       
           checkinDate:checkInDate.toISOString(),
           checkoutDate:checkOutDate.toISOString(),
           request: specialRequests,
           userId: userId,
           roomId: roomId,
           adultGuest: guests.adults,
-          childrenGuest: guests.children
+          childrenGuest: guests.children,
+         
         })
       });
 
       if (!response.ok) throw new Error('Booking failed');
 
       const result = await response.json();
-      console.log(result);
       setBookingResult(result);
+      navigate(`/accounts/${userId}`)
       
       // Refresh bookings
       

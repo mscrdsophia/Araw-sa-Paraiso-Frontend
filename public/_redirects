@@ -1,4 +1,0 @@
-# Redirects
-/old-url         /new-url         301
-/blog/*          /news/:splat     200
-/*               /index.html      200    # SPA fallback

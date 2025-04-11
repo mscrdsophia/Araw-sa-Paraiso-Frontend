@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom"; // Import useParams
+import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
+import Toastify from 'toastify-js';
+import "toastify-js/src/toastify.css";
+import Swal from 'sweetalert2';
 
 function AccPage() {
-  const { userId } = useParams(); // Retrieve userId from route parameters
+  const { userId } = useParams();
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,17 +15,26 @@ function AccPage() {
     firstName: "",
     lastName: "",
     email: "",
-    phoneNumber: "", // Change from "phone" to "phoneNumber"
+    phoneNumber: "",
   });
-  const [bookings, setBookings] = useState([]); // State to store user bookings
+  const [bookings, setBookings] = useState([]);
+  const [roomsMap, setRoomsMap] = useState({});
 
-  const { authToken, setStoredToken } = useContext(AuthContext); // Ensure setStoredToken is destructured
+  const { authToken, logOutUser, authenticateUser} = useContext(AuthContext);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
-  console.log("API URL:", API_URL); // Debug API URL
-  console.log("Auth Token present:", localStorage.getItem("authToken")); // Check if token exists
-  console.log("User ID from route:", userId); // Debug userId
+  const showToast = (message, type = "success") => {
+    Toastify({
+      text: message,
+      duration: 3000,
+      close: true,
+      gravity: "top",
+      position: "right",
+      backgroundColor: type === "success" ? "#4CAF50" : "#F44336",
+      stopOnFocus: true,
+    }).showToast();
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,85 +42,80 @@ function AccPage() {
   };
 
   const handleUpdateProfile = () => {
-    console.log("currentUser:", currentUser); // Debugging line
     if (!currentUser) return;
-
     setIsLoading(true);
     axios
       .put(
-        `${API_URL}/api/users/${currentUser._id}`, // Use _id instead of id
-        updateFormData, // Send updateFormData directly
+        `${API_URL}/api/users/${currentUser._id}`,
+        updateFormData,
         { headers: { Authorization: `Bearer ${authToken}` } }
       )
       .then((response) => {
         setCurrentUser(response.data);
         setIsLoading(false);
-        alert("Profile updated successfully");
+        showToast("Profile updated successfully");
       })
       .catch((error) => {
         const errorMsg = error.response?.data?.message || "Error updating profile";
-        console.error("Error updating user:", error);
         setError(errorMsg);
         setIsLoading(false);
-        alert(errorMsg);
+        showToast(errorMsg);
       });
   };
 
-  const handleDeleteAccount = () => {
-    if (
-      !currentUser ||
-      !confirm("Are you sure you want to delete your account? This action cannot be undone.")
-    ) {
-      return;
-    }
-
-    console.log("Deleting account for user ID:", currentUser._id); // Debug user ID
-    console.log("Auth Token:", authToken); // Debug auth token
-
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+  
+    // Simple confirmation dialog
+    const result = await Swal.fire({
+      title: 'Delete account?',
+      text: "You won't be able to undo this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    });
+  
+    if (!result.isConfirmed) return;
     setIsLoading(true);
     axios
       .delete(`${API_URL}/api/users/${currentUser._id}`, {
-        headers: { Authorization: `Bearer ${authToken}` }, // Ensure token is sent
+        headers: { Authorization: `Bearer ${authToken}` },
       })
       .then(() => {
-        alert("Account deleted successfully");
-        setStoredToken(null); // Clear the stored token
-        setCurrentUser(null); // Clear the current user state
-        setIsLoading(false); // Ensure loading state is reset
-       
+        showToast("Account deleted successfully");
+        localStorage.removeItem("authToken");
+        authenticateUser();
+        navigate("/");
       })
       .catch((error) => {
         const errorMsg = error.response?.data?.message || "Error deleting account";
-        console.error("Error deleting account:", error); // Log the error
         setError(errorMsg);
         setIsLoading(false);
-         navigate("/"); 
       });
   };
 
   const handleLogout = () => {
-    setStoredToken(null); // Clear the stored token
-    setCurrentUser(null); // Clear the current user state
-    navigate("/");
+    localStorage.removeItem("user");
+    logOutUser();
+    navigate("/login");
   };
 
-  // Try alternate API endpoints if needed
   const fetchUserByEndpoints = async () => {
     setIsLoading(true);
     setError(null);
-
+    const token = localStorage.getItem("authToken");
     if (!authToken) {
       setError("No authentication token available");
       setIsLoading(false);
       return;
     }
-
     try {
       const response = await axios.get(`${API_URL}/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("User data fetched successfully:", response.data);
-
       const user = response.data;
       if (user) {
         setCurrentUser(user);
@@ -116,187 +123,199 @@ function AccPage() {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          phoneNumber: user.phoneNumber || "", // Update to match backend field
+          phoneNumber: user.phoneNumber || "",
         });
-      } 
+      }
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Error fetching user data";
-      console.error("Error fetching user data:", err);
-     
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch user bookings
   const fetchUserBookings = async () => {
     setIsLoading(true);
     setError(null);
-
+    const token = localStorage.getItem("authToken");
     try {
-      const response = await axios.get(`${API_URL}/api/bookings/user/${userId}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+      const [bookingsRes, roomsRes] = await Promise.all([
+        axios.get(`${API_URL}/api/bookings/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_URL}/api/rooms`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ]);
+      const roomsArray = roomsRes.data;
+      const roomMap = {};
+      roomsArray.forEach((room) => {
+        roomMap[room._id] = room;
       });
-      setBookings(response.data); // Store bookings in state
+      setRoomsMap(roomMap);
+      setBookings(bookingsRes.data);
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Error fetching bookings";
-      console.error("Error fetching bookings:", err);
-      
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    const result = await Swal.fire({
+      title: 'Delete Booking?',
+      text: "This action cannot be undone!",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Keep it'
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      const token = localStorage.getItem("authToken");
+      await axios.delete(`${API_URL}/api/bookings/${bookingId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBookings((prev) => prev.filter((booking) => booking._id !== bookingId));
+      showToast("Booking deleted successfully.");
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Failed to delete booking";
+      showToast(errorMsg);
     }
   };
 
   useEffect(() => {
     fetchUserByEndpoints();
-    fetchUserBookings(); // Fetch bookings when component loads
-  }, [authToken, userId]); // Add userId as a dependency
+    fetchUserBookings();
+  }, []);
 
+  const calculateNights = (checkinDate, checkoutDate) => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    const checkin = new Date(checkinDate);
+    const checkout = new Date(checkoutDate);
+    return Math.round((checkout - checkin) / oneDay);
+  };
+
+  const formatCurrency = (amount) => `₱${Number(amount || 0).toLocaleString()}`;
+  
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">My Account</h2>
-        
+    <div className="min-h-screen bg-white text-gray-900 px-6 py-8">
+      <div className="mb-6">
+        <button
+          onClick={() => navigate("/")}
+          className="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition"
+        >
+          ← Back to Homepage
+        </button>
+      </div>
+
+      <div className="max-w-6xl mx-auto space-y-8">
+        <h1 className="text-3xl font-bold">My Account</h1>
+
         {isLoading ? (
-          <div className="text-center py-4">
-            <p>Loading user data...</p>
-          </div>
+          <p className="text-center text-gray-500 py-10">Loading...</p>
         ) : error ? (
-          <div className="text-center py-4">
-        
-            <div className="mt-4 p-4 bg-gray-100 rounded text-left">
-              <p className="font-bold">Debugging Information:</p>
-              <p>API URL: {API_URL}</p>
-              <p>Auth Token Present: {authToken ? "Yes" : "No"}</p>
-              {authToken && (
-                <p>Token Format: {authToken.length > 10 ? "Looks valid" : "Possibly invalid"}</p>
-              )}
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={fetchUserByEndpoints}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-2"
-              >
-                Retry
-              </button>
-              <button
-                onClick={() => navigate("/")}
-                className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-              >
-                Go to Login
-              </button>
-            </div>
-          </div>
+          <p className="text-red-600">{error}</p>
         ) : currentUser ? (
-          <div className="space-y-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2">Account Information</h3>
-              <p><strong>Name:</strong> {currentUser.firstName} {currentUser.lastName}</p>
-              <p><strong>Email:</strong> {currentUser.email}</p>
-              <p><strong>Phone:</strong> {currentUser.phoneNumber || "Not provided"}</p>
-              <p className="text-xs text-gray-500 mt-2">User ID: {currentUser._id}</p>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <section className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+                <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+                <ul className="space-y-2 text-sm">
+                  <li><strong>Name:</strong> {currentUser.firstName} {currentUser.lastName}</li>
+                  <li><strong>Email:</strong> {currentUser.email}</li>
+                  <li><strong>Phone:</strong> {currentUser.phoneNumber || "Not provided"}</li>
+                  <li className="text-gray-400 text-xs">User ID: {currentUser._id}</li>
+                </ul>
+              </section>
+
+              <section className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+                <h2 className="text-xl font-semibold mb-4">Update Profile</h2>
+                <div className="grid gap-4">
+                  {["firstName", "lastName", "email", "phoneNumber"].map((field) => (
+                    <div key={field}>
+                      <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace(/([A-Z])/g, " $1")}</label>
+                      <input
+                        type={field === "email" ? "email" : "text"}
+                        name={field}
+                        value={updateFormData[field]}
+                        onChange={handleInputChange}
+                        className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  ))}
+                  <button
+                    onClick={handleUpdateProfile}
+                    disabled={isLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
+                  >
+                    {isLoading ? "Updating..." : "Update Profile"}
+                  </button>
+                </div>
+              </section>
             </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">Update Profile</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={updateFormData.firstName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={updateFormData.lastName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={updateFormData.email}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
-                    type="text"
-                    name="phoneNumber" // Update name to "phoneNumber"
-                    value={updateFormData.phoneNumber} // Update to match state
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
-                </div>
-                <button
-                  onClick={handleUpdateProfile}
-                  className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Updating..." : "Update Profile"}
-                </button>
-              </div>
-            </div>
-            
-            <div className="flex justify-between">
+
+            <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
               <button
                 onClick={handleDeleteAccount}
-                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg"
                 disabled={isLoading}
               >
                 Delete Account
               </button>
               <button
                 onClick={handleLogout}
-                className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+                className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg"
               >
                 Logout
               </button>
             </div>
 
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4">My Bookings</h3>
-              {isLoading ? (
-                <p>Loading bookings...</p>
-              ) : bookings.length > 0 ? (
+            <section className="mt-10">
+              <h2 className="text-xl font-semibold mb-4">My Bookings</h2>
+              {bookings.length > 0 ? (
                 <ul className="space-y-4">
-                  {bookings.map((booking) => (
-                    <li key={booking._id} className="p-4 bg-gray-50 rounded-lg">
-                      <p><strong>Room ID:</strong> {booking.roomId}</p>
-                      <p><strong>Check-in:</strong> {new Date(booking.checkinDate).toLocaleDateString()}</p>
-                      <p><strong>Check-out:</strong> {new Date(booking.checkoutDate).toLocaleDateString()}</p>
-                      <p><strong>Guests:</strong> {booking.adultGuest} Adults, {booking.childrenGuest} Children</p>
-                      <p><strong>Special Requests:</strong> {booking.request || "None"}</p>
-                    </li>
-                  ))}
+                  {bookings.map((booking) => {
+                    // Extract roomId correctly (handles both array and object cases)
+                    const roomId = Array.isArray(booking.roomId) 
+                      ? booking.roomId[0]?.$oid || booking.roomId[0]?._id || booking.roomId[0]
+                      : booking.roomId?.$oid || booking.roomId?._id || booking.roomId;
+                    
+                    const room = roomsMap[roomId];
+                    const nights = calculateNights(booking.checkinDate, booking.checkoutDate);
+                    const totalPrice = room ? room.roomPrice * nights : 0;
+
+                    return (
+                      <li key={booking._id} className="p-4 border border-gray-200 rounded-lg">
+                        <p className="font-medium">Room: {room?.roomName || "Unknown Room"}</p>
+                        <p className="text-sm text-gray-600">
+                          Check-in: {new Date(booking.checkinDate).toLocaleDateString()} <br />
+                          Check-out: {new Date(booking.checkoutDate).toLocaleDateString()} <br />
+                          Guests: {booking.adultGuest} Adults, {booking.childrenGuest} Children <br />
+                          Nights: {nights} <br />
+                          Total Price: {formatCurrency(totalPrice)} <br />
+                          Special Requests: {booking.request || "None"}
+                        </p>
+                        <button
+                          onClick={() => handleDeleteBooking(booking._id)}
+                          className="mt-2 text-sm text-red-500 hover:underline"
+                        >
+                          Delete Booking
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
-                <p>No bookings found.</p>
+                <p className="text-gray-500">No bookings found.</p>
               )}
-            </div>
-          </div>
+            </section>
+          </>
         ) : (
-          <div className="text-center py-4">
-            <p className="text-red-500">Unable to load user data. Please log in again.</p>
-            <button
-              onClick={() => navigate("/")}
-              className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-            >
-              Go to Login
-            </button>
-          </div>
+          <p className="text-center text-red-500 py-10">Unable to load user data. Please log in again.</p>
         )}
       </div>
     </div>

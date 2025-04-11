@@ -20,7 +20,6 @@ export const RoomProvider = ({ children }) => {
         setRooms(response.data);
         setFilteredRooms(response.data);
       } catch (err) {
-        console.error("Fetch error:", err);
         setError(err.message || "Failed to load rooms");
       } finally {
         setLoading(false);

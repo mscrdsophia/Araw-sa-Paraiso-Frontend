@@ -1,4 +1,4 @@
-// src/pages/RoomDetails.jsx
+
 import { useParams } from "react-router-dom";
 import { useContext } from "react";
 import { RoomContext } from "../context/RoomContext";
@@ -7,7 +7,6 @@ import Navbar from "../components/navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
-
 
 
 export default function RoomDetails() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Logo from '../assets/Logo 2.png';
 import User from '../assets/images/user.png';
 import { AuthContext } from '../context/auth.context';
@@ -8,11 +8,14 @@ const Navbar = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
-   // Destructure only what you need from context
-   const { isLoggedIn, user } = useContext(AuthContext);
+  const { isLoggedIn, user } = useContext(AuthContext);
+  
+  // Refs for menu and submenu containers
+  const menuRef = useRef(null);
+  const submenuRef = useRef(null);
 
   useEffect(() => {
-      const handleResize = () => {
+    const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
@@ -35,6 +38,25 @@ const Navbar = () => {
     }
   };
 
+  // Handle mouse leave for the combined menu and submenu area
+  const handleMouseLeave = (e) => {
+    if (isMobileView) return;
+    
+    // Check if we're leaving to a non-child element
+    const relatedTarget = e.relatedTarget;
+    if (
+      !menuRef.current?.contains(relatedTarget) && 
+      !submenuRef.current?.contains(relatedTarget)
+    ) {
+      setActiveSubmenu(null);
+    }
+  };
+
+  const handleReserveClick = () => {
+    const route = Math.random() < 0.5 ? "/villas" : "/casitas";
+    window.location.href = route;
+  };
+
   return (
     <div className="text-[#2e2e2e] text-sm font-sans relative z-50 bg-white">
       {/* Top Bar */}
@@ -50,7 +72,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-2">
             <img src={User} alt="User" className="w-5 h-5" />
             <Link to={`/accounts/${user._id}`}>
-            <span className="text-sm hidden md:inline">{user?.firstName}</span>
+              <span className="text-sm hidden md:inline">{user?.firstName}</span>
             </Link>
           </div>
         ) : (
@@ -67,10 +89,13 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <a href="/reserve" className="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm">
-            Reserve
-          </a>
-        </div>
+  <button 
+    onClick={handleReserveClick}
+    className="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm"
+  >
+    Reserve
+  </button>
+</div>
       </div>
 
       {/* Mobile Menu */}
@@ -82,6 +107,8 @@ const Navbar = () => {
         className={`w-full ${isMobileView ? 'fixed top-0 left-0 h-full bg-white z-50 transform transition-transform duration-300 ease-in-out' : ''} ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0 md:bg-transparent`}
+        onMouseLeave={handleMouseLeave}
+        ref={menuRef}
       >
         {isMobileView && (
           <button onClick={toggleMobileMenu} className="absolute top-4 right-4 p-2 md:hidden">
@@ -96,12 +123,10 @@ const Navbar = () => {
           <div className="px-4 pt-12 pb-4 border-b border-gray-200">
             {isLoggedIn ? (
               <div className="flex items-center space-x-2 text-lg">
-              <Link to={`/accounts/${user._id}`}>
-                <img src={User} alt="User" className="w-6 h-6" />
-                
-                   <span>{user?.firstName}</span>
+                <Link to={`/accounts/${user._id}`}>
+                  <img src={User} alt="User" className="w-6 h-6" />
+                  <span>{user?.firstName}</span>
                 </Link>
-               
               </div>
             ) : (
               <a href="/login" className="flex items-center space-x-2 text-lg">
@@ -154,17 +179,17 @@ const Navbar = () => {
             </button>
           </div>
 
-          <a href="/dining" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Dining</a>
-          <a href="/wellness" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Wellness</a>
-          <a href="/celebrations" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Celebrations</a>
-          <a href="/contact-us" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Contact Us</a>
+          <a className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Dining</a>
+          <a className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Wellness</a>
+          <a className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Celebrations</a>
+          <a className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Contact Us</a>
         </div>
 
         {/* Submenu: Accommodation */}
         {(activeSubmenu === "accommodation" || (isMobileView && activeSubmenu === "accommodation")) && (
           <div
             className={`flex ${isMobileView ? 'flex-col items-start px-6 py-2 space-y-2' : 'items-center justify-center px-6 py-3 border-b border-black space-x-6'} text-[14px] bg-white transition-all duration-200`}
-            onMouseEnter={() => !isMobileView && setActiveSubmenu("accommodation")}
+            ref={submenuRef}
           >
             <a href="/villas" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Villas</a>
             <a href="/casitas" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Casitas</a>
@@ -175,12 +200,12 @@ const Navbar = () => {
         {(activeSubmenu === "experiences" || (isMobileView && activeSubmenu === "experiences")) && (
           <div
             className={`flex ${isMobileView ? 'flex-col items-start px-6 py-2 space-y-2' : 'items-center justify-center px-6 py-3 border-b border-black space-x-6'} text-[14px] bg-white transition-all duration-200`}
-            onMouseEnter={() => !isMobileView && setActiveSubmenu("experiences")}
+            ref={submenuRef}
           >
-            <a href="/experiences#scuba-diving" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Scuba diving</a>
-            <a href="/experiences#kite" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Kite & Surf Centre</a>
-            <a href="/experiences#cruises" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Cruises</a>
-            <a href="/experiences#pearl" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Golden South Sea Pearl Journey</a>
+            <a href="/scuba-diving" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Scuba diving</a>
+            <a href="/kite-surf" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Kite & Surf Centre</a>
+            <a href="/cruises" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Cruises</a>
+            <a href="/pearl-journey" className={`hover:underline ${isMobileView ? 'py-2 text-lg w-full' : ''}`}>Golden South Sea Pearl Journey</a>
           </div>
         )}
       </div>
