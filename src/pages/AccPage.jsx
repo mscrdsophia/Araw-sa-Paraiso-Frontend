@@ -20,7 +20,7 @@ function AccPage() {
   const [bookings, setBookings] = useState([]);
   const [roomsMap, setRoomsMap] = useState({});
 
-  const { authToken, logOutUser } = useContext(AuthContext);
+  const { authToken, logOutUser, authenticateUser} = useContext(AuthContext);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -87,8 +87,7 @@ function AccPage() {
       .then(() => {
         showToast("Account deleted successfully");
         localStorage.removeItem("authToken");
-        setCurrentUser(null);
-        setIsLoading(false);
+        authenticateUser();
         navigate("/");
       })
       .catch((error) => {
