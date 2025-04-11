@@ -21,7 +21,7 @@ function Villas() {
       {/* Overview Section */}
       <section className="mb-12 pt-6">
         <h1 className="text-center text-4xl md:text-5xl font-bold mb-6 mt-10 text-amber-800">
-          Araw sa Paraiso Casitas
+          Araw sa Paraiso Villas
         </h1>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">

@@ -45,7 +45,6 @@ const StyleDatePicker = () => {
         setBookings(formattedBookings);
       } catch (err) {
         setError('Failed to load booking data');
-        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -84,24 +83,18 @@ const StyleDatePicker = () => {
 
   // Create booking
   const handleBookNow = async () => {
-    console.log("working")
-    // if (!checkInDate || !checkOutDate || !userId || !roomId) return;
-
     setIsLoading(true);
     setError(null);
     
     try {
       const storedToken = localStorage.getItem('authToken');
-      
       const response = await fetch(`${API_URL}/api/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${storedToken}`,
-
         },
         body: JSON.stringify({
-       
           checkinDate:checkInDate.toISOString(),
           checkoutDate:checkOutDate.toISOString(),
           request: specialRequests,
@@ -116,9 +109,8 @@ const StyleDatePicker = () => {
       if (!response.ok) throw new Error('Booking failed');
 
       const result = await response.json();
-      console.log(result);
       setBookingResult(result);
-      navigate(`/accounts/:userId`)
+      navigate(`/accounts/${userId}`)
       
       // Refresh bookings
       
